@@ -1,0 +1,127 @@
+@if (bill(); as b) {
+  <div class="page-head">
+    <div>
+      <h2>Bill Detail</h2>
+      <p>Bill {{ b.bill_number }} · <span class="badge b-{{ b.status.toLowerCase() }}">{{ b.status }}</span></p>
+    </div>
+    <div class="actions">
+      <a class="btn" routerLink="/billing">← Bills</a>
+      @if (b.status === 'GENERATED') {
+        <button type="button" class="btn btn-primary" (click)="issue()">Issue Bill →</button>
+      }
+    </div>
+  </div>
+
+  <!-- Invoice card -->
+  <div class="invoice-card">
+    <!-- Hero -->
+    <div class="invoice-hero">
+      <div class="invoice-brand">
+        <div class="invoice-logo">OC</div>
+        <div>
+          <div class="invoice-brand-text">OrderCraft</div>
+          <div class="invoice-brand-sub">Manufacturing Order Management</div>
+        </div>
+      </div>
+      <div class="invoice-meta">
+        <div class="invoice-meta-label">Invoice</div>
+        <div class="invoice-meta-value">{{ b.bill_number }}</div>
+        <span class="badge b-{{ b.status.toLowerCase() }} invoice-meta-status">{{ b.status }}</span>
+      </div>
+    </div>
+
+    <div class="invoice-body">
+      <!-- Bill info row -->
+      <div class="invoice-info-row">
+        <dl class="info-item">
+          <dt>Bill Date</dt>
+          <dd>{{ b.bill_date | date: 'dd MMM yyyy' }}</dd>
+        </dl>
+        <dl class="info-item">
+          <dt>Order</dt>
+          <dd><a class="link" [routerLink]="['/orders', b.order_id]">#{{ b.order_id }}</a></dd>
+        </dl>
+        <dl class="info-item">
+          <dt>Bill Status</dt>
+          <dd>{{ b.status }}</dd>
+        </dl>
+      </div>
+
+      <!-- Parties -->
+      <div class="invoice-parties">
+        <div>
+          <div class="party-label">Billed To</div>
+          <div class="party-name">{{ customer()?.customer_name }}</div>
+          <div class="party-detail">
+            {{ customer()?.billing_address }}<br>
+            {{ customer()?.email }}<br>
+            {{ customer()?.phone }}
+          </div>
+        </div>
+        <div>
+          <div class="party-label">Billed By</div>
+          <div class="party-name">OrderCraft Ltd.</div>
+          <div class="party-detail">
+            Manufacturing Division<br>
+            contact&#64;ordercraft.com<br>
+            +91-000-000-0000
+          </div>
+        </div>
+      </div>
+
+      <!-- Line items -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item Code</th>
+              <th>Description</th>
+              <th class="num">Quantity</th>
+              <th class="num">Unit Price</th>
+              <th class="num">Line Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of items(); track i.order_item_id) {
+              <tr>
+                <td class="nowrap" style="font-family:monospace;font-size:12.5px">{{ i.item_code }}</td>
+                <td>{{ i.description }}</td>
+                <td class="num">{{ i.quantity }}</td>
+                <td class="num nowrap">{{ inr(i.unit_price) }}</td>
+                <td class="num nowrap" style="font-weight:600">{{ inr(i.line_total) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="totals-box">
+          <div class="totals-row">
+            <span class="label">Subtotal</span>
+            <span class="amount">{{ inr(b.subtotal) }}</span>
+          </div>
+          <div class="totals-row">
+            <span class="label">Tax</span>
+            <span class="amount" style="color:var(--muted)">{{ inr(b.tax_amount) }}</span>
+          </div>
+          <div class="totals-grand">
+            <span class="label">Total Amount</span>
+            <span class="amount">{{ inr(b.total_amount) }}</span>
+          </div>
+        </div>
+      </div>
+      <p class="tax-note">Tax rate is currently 0% (policy pending confirmation).</p>
+    </div>
+  </div>
+} @else {
+  <section class="card">
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:40px;margin-bottom:12px">🧾</div>
+      <h3>Bill not found</h3>
+      <p class="muted" style="margin-top:8px">No bill exists with this ID.</p>
+      <a class="btn btn-primary" routerLink="/billing" style="margin-top:16px;display:inline-flex">Back to bills</a>
+    </div>
+  </section>
+}

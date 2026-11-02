@@ -1,0 +1,194 @@
+@if (order(); as o) {
+  <div class="page-head">
+    <div>
+      <h2>Payment Tracking</h2>
+      <p>Order #{{ o.order_id }} &nbsp;·&nbsp; <span class="badge s-{{ o.status.toLowerCase() }}">{{ o.status }}</span></p>
+    </div>
+    <div class="actions">
+      <a class="btn" routerLink="/tracking">← Tracking</a>
+      <a class="btn" [routerLink]="['/orders', o.order_id]">View Order</a>
+    </div>
+  </div>
+
+  <!-- Order & bill overview -->
+  <section class="card">
+    <div class="section-head"><h3>Order &amp; Bill Overview</h3></div>
+    <dl class="detail-grid">
+      <div>
+        <dt>Customer</dt>
+        <dd>{{ customer()?.customer_name }}</dd>
+      </div>
+      <div>
+        <dt>Order Status</dt>
+        <dd><span class="badge s-{{ o.status.toLowerCase() }}">{{ o.status }}</span></dd>
+      </div>
+      <div>
+        <dt>Bill</dt>
+        <dd>
+          @if (bill(); as b) {
+            <a class="link" [routerLink]="['/billing', b.bill_id]">{{ b.bill_number }}</a>
+            &nbsp;<span class="badge b-{{ b.status.toLowerCase() }}">{{ b.status }}</span>
+          } @else {
+            <span style="color:var(--muted)">Not billed yet</span>
+          }
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  @if (bill(); as b) {
+    <!-- Payment summary boxes -->
+    <section class="card">
+      <div class="section-head"><h3>Payment Summary</h3></div>
+      <div class="payment-summary">
+        <div class="sum-box">
+          <div class="sum-label">Bill Total</div>
+          <div class="sum-value">{{ inr(b.total_amount) }}</div>
+        </div>
+        <div class="sum-box">
+          <div class="sum-label">Paid Amount</div>
+          <div class="sum-value" style="color:var(--success)">{{ inr(paid()) }}</div>
+        </div>
+        <div class="sum-box">
+          <div class="sum-label">Amount Due</div>
+          <div class="sum-value" [style.color]="due() > 0 ? 'var(--danger)' : 'var(--muted)'">{{ inr(due()) }}</div>
+        </div>
+        <div class="sum-box sum-box-status">
+          <div class="sum-label">Payment Status</div>
+          <div class="sum-value">
+            <span class="badge p-{{ statusClass() }}" style="font-size:13px;padding:5px 12px">{{ status() }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment history -->
+    <section class="card">
+      <div class="section-head"><h3>Payment History</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="num">Amount</th>
+              <th>Method</th>
+              <th>Reference No.</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of payments(); track p.payment_id) {
+              <tr>
+                <td class="nowrap muted">{{ p.payment_date | date: 'dd MMM yyyy' }}</td>
+                <td class="num nowrap" style="font-weight:700;color:var(--success)">{{ inr(p.amount) }}</td>
+                <td>{{ p.method }}</td>
+                <td style="font-family:monospace;font-size:12.5px">{{ p.reference_no || '—' }}</td>
+                <td>
+                  <span class="badge" [style.background]="p.status === 'CLEARED' ? 'var(--success-bg)' : '#f3f4f6'"
+                        [style.color]="p.status === 'CLEARED' ? 'var(--success-text)' : 'var(--muted)'">
+                    {{ p.status }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="empty">
+                <div style="font-size:28px;margin-bottom:6px">💰</div>
+                No payments recorded yet.
+              </td></tr>
+            }
+          </tbody>
+          @if (payments().length > 0) {
+            <tfoot>
+              <tr>
+                <td style="color:var(--muted);font-size:12px">Total paid</td>
+                <td class="num nowrap">{{ inr(paid()) }}</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          }
+        </table>
+      </div>
+    </section>
+
+    <!-- Record payment form -->
+    <section class="card">
+      <div class="section-head"><h3>Record Payment</h3></div>
+      @if (due() > 0) {
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="pdate">Payment Date *</label>
+              <input id="pdate" type="date" class="input" formControlName="payment_date" />
+              @if (form.controls.payment_date.touched && form.controls.payment_date.invalid) {
+                <small class="err">⚠ {{ msg(form.controls.payment_date) }}</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="pamount">
+                Amount (₹) * <span class="hint">max {{ inr(due()) }}</span>
+              </label>
+              <div class="field-row">
+                <input id="pamount" type="number" step="any" min="0.01" class="input" formControlName="amount" />
+                <button type="button" class="btn btn-sm" (click)="payInFull()">Pay Full</button>
+              </div>
+              @if (form.controls.amount.touched && form.controls.amount.invalid) {
+                <small class="err">⚠ {{ msg(form.controls.amount) }}</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="pmethod">Method *</label>
+              <input id="pmethod" class="input" list="methods" formControlName="method" placeholder="e.g. Bank Transfer" />
+              <datalist id="methods">
+                @for (m of methodSuggestions; track m) {
+                  <option [value]="m"></option>
+                }
+              </datalist>
+              @if (form.controls.method.touched && form.controls.method.invalid) {
+                <small class="err">⚠ {{ msg(form.controls.method) }}</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="pref">Reference No. <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+              <input id="pref" class="input" formControlName="reference_no" placeholder="e.g. TXN-123456" />
+            </div>
+          </div>
+
+          @if (submitted() && form.invalid) {
+            <p class="err-banner">⚠ Please fix the highlighted fields.</p>
+          }
+          @if (error()) {
+            <p class="err-banner">⚠ {{ error() }}</p>
+          }
+          <div class="actions" style="margin-top:16px">
+            <button type="submit" class="btn btn-primary">Record Payment</button>
+          </div>
+        </form>
+      } @else {
+        <div class="fully-paid-note">
+          ✅ This bill is fully paid. No further payments can be recorded.
+        </div>
+      }
+    </section>
+  } @else {
+    <section class="card">
+      <div style="text-align:center;padding:24px 20px">
+        <div style="font-size:36px;margin-bottom:10px">📄</div>
+        <h3 style="margin-bottom:8px">No bill generated yet</h3>
+        <p class="muted">Payments are recorded against a bill. Generate a bill for this order first.</p>
+        <a class="btn btn-primary" routerLink="/billing/new" style="margin-top:16px;display:inline-flex">Generate Bill</a>
+      </div>
+    </section>
+  }
+} @else {
+  <section class="card">
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:40px;margin-bottom:12px">🔍</div>
+      <h3>Order not found</h3>
+      <p class="muted" style="margin-top:8px">No order exists with this ID.</p>
+      <a class="btn btn-primary" routerLink="/tracking" style="margin-top:16px;display:inline-flex">Back to tracking</a>
+    </div>
+  </section>
+}

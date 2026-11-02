@@ -1,0 +1,45 @@
+/* ── Supplier status badges ── */
+.st-active   { background: var(--success-bg); color: var(--success-text); }
+.st-inactive { background: #f1f5f9; color: #64748b; }
+
+/* ── Supplier card grid ── */
+.supplier-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.supplier-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  background: var(--surface);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.supplier-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary); transform: translateY(-1px); }
+.supplier-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.supplier-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.supplier-contact { font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
+.supplier-info { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.supplier-info-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-2); }
+.supplier-info-row .ico { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+.supplier-actions { display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid var(--border-light); padding-top: 12px; margin-top: 4px; }
+
+/* ── Supplier detail ── */
+.cell-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+.wide { grid-column: 1 / -1; }
+
+/* ── Avatar initials ── */
+.supplier-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 14px;
+  flex-shrink: 0;
+}

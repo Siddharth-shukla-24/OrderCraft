@@ -1,0 +1,104 @@
+<!-- ═══════════════════════ Dashboard ═══════════════════════ -->
+
+<div class="page-header">
+  <div>
+    <h2>Dashboard</h2>
+    <p class="page-subtitle">Overview of orders, billing and supplier activity</p>
+  </div>
+  <a class="refresh-btn" routerLink="/orders">
+    📋 View all orders
+  </a>
+</div>
+
+<!-- KPI cards -->
+<div class="kpi-grid">
+  @for (s of stats; track s.label) {
+    <div class="kpi-card">
+      <div class="kpi-icon {{ s.iconClass }}">{{ s.icon }}</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ s.value }}</div>
+        <div class="kpi-label">{{ s.label }}</div>
+      </div>
+      <div class="kpi-accent-bar {{ s.barClass }}"></div>
+    </div>
+  }
+</div>
+
+<!-- Bottom grid -->
+<div class="content-grid">
+
+  <!-- Recent orders table -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Recent Orders</div>
+        <div class="card-subtitle">Last 5 orders by date</div>
+      </div>
+      <a class="view-all-link" routerLink="/orders">View all →</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th class="num">Amount</th>
+            <th>Status</th>
+            <th>Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of recent; track o.id) {
+            <tr>
+              <td class="nowrap">
+                <a class="link order-id-cell" [routerLink]="['/orders', o.id]">#{{ o.id }}</a>
+              </td>
+              <td>{{ o.customer }}</td>
+              <td class="nowrap muted-text">{{ o.date | date: 'dd MMM yyyy' }}</td>
+              <td class="num nowrap">{{ inr(o.total) }}</td>
+              <td><span class="badge s-{{ o.status.toLowerCase() }}">{{ o.status }}</span></td>
+              <td>
+                @if (o.paymentStatus) {
+                  <span class="badge p-{{ o.paymentClass }}">{{ o.paymentStatus }}</span>
+                } @else {
+                  <span class="no-bill">No bill</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">No orders yet</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Order status breakdown -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Orders by Status</div>
+        <div class="card-subtitle">Across all orders</div>
+      </div>
+    </div>
+    <div class="breakdown-list">
+      @for (b of breakdown; track b.status) {
+        <div class="breakdown-row">
+          <div class="breakdown-head">
+            <span class="breakdown-status">{{ b.status }}</span>
+            <span class="breakdown-count">{{ b.count }}</span>
+          </div>
+          <div class="progress-track">
+            <div
+              class="progress-fill fill-{{ b.status.toLowerCase() }}"
+              [style.width.%]="b.percent"
+            ></div>
+          </div>
+          <div class="breakdown-pct">{{ b.percent }}%</div>
+        </div>
+      }
+    </div>
+  </div>
+
+</div>

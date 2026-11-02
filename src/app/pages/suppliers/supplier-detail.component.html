@@ -1,0 +1,66 @@
+@if (supplier(); as s) {
+  <div class="page-head">
+    <div>
+      <h2>{{ s.supplier_name }}</h2>
+      <p>
+        <span class="badge st-{{ s.status.toLowerCase() }}">{{ s.status }}</span>
+        &nbsp;·&nbsp; Supplier ID {{ s.supplier_id }}
+      </p>
+    </div>
+    <div class="actions">
+      <a class="btn" routerLink="/suppliers">← Suppliers</a>
+      <a class="btn" [routerLink]="['/suppliers', s.supplier_id, 'edit']">Edit</a>
+      <button type="button" class="btn" [class.btn-danger]="s.status === 'ACTIVE'" (click)="toggle()">
+        {{ s.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
+      </button>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="section-head">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="supplier-avatar" style="width:50px;height:50px;font-size:18px;border-radius:12px">
+          {{ s.supplier_name.charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <h3>{{ s.supplier_name }}</h3>
+          <div style="color:var(--muted);font-size:13px;margin-top:2px">{{ s.contact_person }}</div>
+        </div>
+      </div>
+    </div>
+
+    <dl class="detail-grid" style="margin-top:16px">
+      <div>
+        <dt>Contact Person</dt>
+        <dd>{{ s.contact_person }}</dd>
+      </div>
+      <div>
+        <dt>Email</dt>
+        <dd>
+          <a [href]="'mailto:' + s.email" style="color:var(--primary);text-decoration:none">{{ s.email }}</a>
+        </dd>
+      </div>
+      <div>
+        <dt>Phone</dt>
+        <dd>{{ s.phone }}</dd>
+      </div>
+      <div>
+        <dt>Status</dt>
+        <dd><span class="badge st-{{ s.status.toLowerCase() }}">{{ s.status }}</span></dd>
+      </div>
+      <div class="wide">
+        <dt>Address</dt>
+        <dd>{{ s.address || '—' }}</dd>
+      </div>
+    </dl>
+  </section>
+} @else {
+  <section class="card">
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:40px;margin-bottom:12px">🏭</div>
+      <h3>Supplier not found</h3>
+      <p class="muted" style="margin-top:8px">No supplier exists with this ID.</p>
+      <a class="btn btn-primary" routerLink="/suppliers" style="margin-top:16px;display:inline-flex">Back to suppliers</a>
+    </div>
+  </section>
+}

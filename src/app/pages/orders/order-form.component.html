@@ -1,0 +1,167 @@
+@if (notFound()) {
+  <section class="card">
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <h3>Order not found</h3>
+      <p class="muted" style="margin-top:8px">No order exists with this ID.</p>
+      <a class="btn btn-primary" routerLink="/orders" style="margin-top:16px;display:inline-flex">Back to orders</a>
+    </div>
+  </section>
+} @else {
+  <div class="page-head">
+    <div>
+      <h2>
+        @if (order(); as o) {
+          Edit Order #{{ o.order_id }}
+        } @else {
+          New Order
+        }
+      </h2>
+      <p>
+        @if (order()) { Update order details and line items }
+        @else { Fill in the details to create a new order }
+      </p>
+    </div>
+    <div class="head-actions">
+      <a class="btn" [routerLink]="cancelLink()">Cancel</a>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <section class="card">
+      <div class="section-head"><h3>Order Details</h3></div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="customer">Customer *</label>
+          @if (order(); as o) {
+            <div class="static">{{ store.customerOf(o.customer_id)?.customer_name }}</div>
+          } @else {
+            <select id="customer" class="input" formControlName="customer_id">
+              <option [ngValue]="0">Select customer…</option>
+              @for (c of customers; track c.customer_id) {
+                <option [ngValue]="c.customer_id">{{ c.customer_name }}</option>
+              }
+            </select>
+            @if (form.controls.customer_id.touched && form.controls.customer_id.invalid) {
+              <small class="err">⚠ Select a customer</small>
+            }
+          }
+        </div>
+
+        <div class="field">
+          <label for="required">Required Date *</label>
+          <input id="required" type="date" class="input" formControlName="required_date" />
+          @if (form.controls.required_date.touched && form.controls.required_date.invalid) {
+            <small class="err">⚠ Required date is required</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="status">Status</label>
+          @if (order()) {
+            <select id="status" class="input" formControlName="status">
+              @for (s of statuses(); track s) {
+                <option [ngValue]="s">{{ s }}</option>
+              }
+            </select>
+          } @else {
+            <div class="static">
+              <span class="badge s-new">NEW</span>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h3>Line Items</h3>
+        </div>
+        @if (!locked()) {
+          <button type="button" class="btn btn-sm btn-primary" (click)="addItem()">+ Add Item</button>
+        }
+      </div>
+      @if (locked()) {
+        <p class="note">🔒 Line items are locked — this order already has a bill attached.</p>
+      }
+
+      <div class="table-wrap">
+        <table class="items">
+          <thead>
+            <tr>
+              <th>Item Code *</th>
+              <th>Description *</th>
+              <th>Qty *</th>
+              <th>Unit Price (₹) *</th>
+              <th class="num">Line Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (g of items.controls; track g; let i = $index) {
+              <tr [formGroup]="g">
+                <td>
+                  <input class="input" formControlName="item_code" aria-label="Item code" placeholder="e.g. SKU-001" />
+                  @if (g.controls.item_code.touched && g.controls.item_code.invalid) {
+                    <small class="err">{{ msg(g.controls.item_code) }}</small>
+                  }
+                </td>
+                <td>
+                  <input class="input" formControlName="description" aria-label="Description" placeholder="Item description" />
+                  @if (g.controls.description.touched && g.controls.description.invalid) {
+                    <small class="err">{{ msg(g.controls.description) }}</small>
+                  }
+                </td>
+                <td>
+                  <input class="input" type="number" step="any" min="1" formControlName="quantity" aria-label="Quantity" placeholder="1" />
+                  @if (g.controls.quantity.touched && g.controls.quantity.invalid) {
+                    <small class="err">{{ msg(g.controls.quantity) }}</small>
+                  }
+                </td>
+                <td>
+                  <input class="input" type="number" step="any" min="0" formControlName="unit_price" aria-label="Unit price" placeholder="0.00" />
+                  @if (g.controls.unit_price.touched && g.controls.unit_price.invalid) {
+                    <small class="err">{{ msg(g.controls.unit_price) }}</small>
+                  }
+                </td>
+                <td class="num nowrap" style="font-weight:700">{{ inr(lineTotal(g)) }}</td>
+                <td>
+                  @if (!locked()) {
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger"
+                      [disabled]="items.length === 1"
+                      (click)="removeItem(i)"
+                      aria-label="Remove item"
+                    >✕</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="num" style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em">Order Total</td>
+              <td class="num nowrap" style="font-size:16px">{{ inr(total()) }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    @if (error()) {
+      <p class="err-banner">⚠ {{ error() }}</p>
+    }
+    @if (submitted() && form.invalid) {
+      <p class="err-banner">⚠ Please fix the highlighted fields before submitting.</p>
+    }
+    <div class="actions" style="margin-top:4px">
+      <a class="btn" [routerLink]="cancelLink()">Cancel</a>
+      <button type="submit" class="btn btn-primary">
+        {{ order() ? 'Save Changes' : 'Create Order' }}
+      </button>
+    </div>
+  </form>
+}

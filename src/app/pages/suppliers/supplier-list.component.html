@@ -1,0 +1,81 @@
+<div class="page-head">
+  <div>
+    <h2>Supplier Management</h2>
+    <p>{{ rows().length }} supplier(s) listed</p>
+  </div>
+  <div class="head-actions">
+    <a class="btn btn-primary" routerLink="/suppliers/new">+ Add Supplier</a>
+  </div>
+</div>
+
+<section class="card">
+  <div class="toolbar">
+    <input
+      #q
+      type="search"
+      class="input grow"
+      placeholder="🔍  Search by name, contact, email, phone or address…"
+      [value]="search()"
+      (input)="search.set(q.value)"
+    />
+    <select #s class="input" aria-label="Filter by status" (change)="setStatus(s.value)">
+      <option value="ALL">All statuses</option>
+      @for (st of statuses; track st) {
+        <option [value]="st">{{ st }}</option>
+      }
+    </select>
+  </div>
+
+  @if (rows().length > 0) {
+    <!-- Card grid view -->
+    <div class="supplier-cards">
+      @for (s of rows(); track s.supplier_id) {
+        <div class="supplier-card">
+          <div class="supplier-card-header">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="supplier-avatar">{{ s.supplier_name.charAt(0).toUpperCase() }}</div>
+              <div>
+                <div class="supplier-name">{{ s.supplier_name }}</div>
+                <div class="supplier-contact">{{ s.contact_person }}</div>
+              </div>
+            </div>
+            <span class="badge st-{{ s.status.toLowerCase() }}">{{ s.status }}</span>
+          </div>
+
+          <div class="supplier-info">
+            <div class="supplier-info-row">
+              <span class="ico">✉</span>
+              <span>{{ s.email }}</span>
+            </div>
+            <div class="supplier-info-row">
+              <span class="ico">📞</span>
+              <span>{{ s.phone }}</span>
+            </div>
+            @if (s.address) {
+              <div class="supplier-info-row">
+                <span class="ico">📍</span>
+                <span style="line-height:1.4">{{ s.address }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="supplier-actions">
+            <a class="btn btn-sm" [routerLink]="['/suppliers', s.supplier_id]">View</a>
+            <a class="btn btn-sm" [routerLink]="['/suppliers', s.supplier_id, 'edit']">Edit</a>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-danger]="s.status === 'ACTIVE'"
+              (click)="toggle(s)"
+            >{{ s.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}</button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty" style="padding:48px 20px">
+      <div style="font-size:36px;margin-bottom:10px">🏭</div>
+      No suppliers match your search or filter.
+    </div>
+  }
+</section>

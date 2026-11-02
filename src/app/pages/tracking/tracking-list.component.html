@@ -1,0 +1,83 @@
+<div class="page-head">
+  <div>
+    <h2>Payment Tracking</h2>
+    <p>Monitor order and payment status across all orders</p>
+  </div>
+</div>
+
+<section class="card">
+  <div class="toolbar">
+    <input
+      #q
+      type="search"
+      class="input grow"
+      placeholder="🔍  Search by order #, customer or bill number…"
+      [value]="search()"
+      (input)="search.set(q.value)"
+    />
+    <select #o class="input" aria-label="Filter by order status" (change)="setOrderStatus(o.value)">
+      <option value="ALL">All order statuses</option>
+      @for (st of orderStatuses; track st) {
+        <option [value]="st">{{ st }}</option>
+      }
+    </select>
+    <select #p class="input" aria-label="Filter by payment status" (change)="setPaymentFilter(p.value)">
+      <option value="ALL">All payment statuses</option>
+      @for (st of paymentStatuses; track st) {
+        <option [value]="st">{{ st }}</option>
+      }
+      <option value="NO BILL">NO BILL</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Order Status</th>
+          <th>Bill #</th>
+          <th>Bill Status</th>
+          <th class="num">Bill Total</th>
+          <th class="num">Paid</th>
+          <th class="num">Amount Due</th>
+          <th>Payment</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of rows(); track r.id) {
+          <tr>
+            <td class="nowrap">
+              <a class="link" style="font-weight:700" [routerLink]="['/tracking', r.id]">#{{ r.id }}</a>
+            </td>
+            <td>{{ r.customer }}</td>
+            <td><span class="badge s-{{ r.orderStatus.toLowerCase() }}">{{ r.orderStatus }}</span></td>
+            @if (r.billNumber) {
+              <td class="nowrap" style="font-size:12.5px;font-weight:600">{{ r.billNumber }}</td>
+              <td><span class="badge b-{{ r.billStatus?.toLowerCase() }}">{{ r.billStatus }}</span></td>
+              <td class="num nowrap">{{ inr(r.billTotal) }}</td>
+              <td class="num nowrap" style="color:var(--success);font-weight:600">{{ inr(r.paid) }}</td>
+              <td class="num nowrap" [style.color]="r.due > 0 ? 'var(--danger)' : 'var(--muted)'" style="font-weight:600">{{ inr(r.due) }}</td>
+              <td><span class="badge p-{{ r.paymentClass }}">{{ r.paymentStatus }}</span></td>
+            } @else {
+              <td class="muted" colspan="6" style="font-style:italic;font-size:12.5px">No bill generated</td>
+              <td><span class="no-bill">—</span></td>
+            }
+            <td>
+              <div class="cell-actions">
+                <a class="btn btn-sm" [routerLink]="['/tracking', r.id]">Track</a>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="10" class="empty">
+            <div style="font-size:32px;margin-bottom:8px">💳</div>
+            No orders match your search or filters.
+          </td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

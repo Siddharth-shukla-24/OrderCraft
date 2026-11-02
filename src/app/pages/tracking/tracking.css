@@ -1,0 +1,62 @@
+/* ── Payment status badges ── */
+.p-pending { background: var(--danger-bg); color: var(--danger-text); }
+.p-partial { background: #dbeafe; color: #1e40af; }
+.p-paid    { background: var(--success-bg); color: var(--success-text); }
+.no-bill   { color: var(--muted-light); font-size: 12px; font-style: italic; }
+
+/* ── Payment summary boxes ── */
+.payment-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-top: 6px;
+}
+.sum-box {
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: var(--transition);
+}
+.sum-box:hover { box-shadow: var(--shadow-sm); }
+.sum-label {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.sum-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.sum-box-status .sum-value { font-size: 14px; }
+
+/* ── Payment form extras ── */
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  margin-left: 4px;
+}
+.field-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.fully-paid-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--success-bg);
+  border: 1px solid #a7f3d0;
+  border-radius: var(--radius);
+  color: var(--success-text);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.cell-actions { display: flex; gap: 6px; justify-content: flex-end; }

@@ -1,0 +1,102 @@
+@if (notFound()) {
+  <section class="card">
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <h3>Supplier not found</h3>
+      <p class="muted" style="margin-top:8px">No supplier exists with this ID.</p>
+      <a class="btn btn-primary" routerLink="/suppliers" style="margin-top:16px;display:inline-flex">Back to suppliers</a>
+    </div>
+  </section>
+} @else {
+  <div class="page-head">
+    <div>
+      <h2>
+        @if (supplier(); as s) {
+          Edit: {{ s.supplier_name }}
+        } @else {
+          Add Supplier
+        }
+      </h2>
+      <p>
+        @if (supplier()) { Update the supplier's information }
+        @else { Fill in the details to add a new supplier }
+      </p>
+    </div>
+    <div class="head-actions">
+      <a class="btn" [routerLink]="cancelLink()">Cancel</a>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <section class="card">
+      <div class="section-head"><h3>Supplier Details</h3></div>
+
+      @if (!supplier()) {
+        <p class="note">ℹ New suppliers are created as ACTIVE and can be deactivated later.</p>
+      }
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="name">Supplier Name *</label>
+          <input id="name" class="input" formControlName="supplier_name" placeholder="e.g. Acme Manufacturing Ltd." />
+          @if (form.controls.supplier_name.touched && form.controls.supplier_name.invalid) {
+            <small class="err">⚠ {{ msg(form.controls.supplier_name) }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="contact">Contact Person *</label>
+          <input id="contact" class="input" formControlName="contact_person" placeholder="e.g. John Smith" />
+          @if (form.controls.contact_person.touched && form.controls.contact_person.invalid) {
+            <small class="err">⚠ {{ msg(form.controls.contact_person) }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email *</label>
+          <input id="email" type="email" class="input" formControlName="email" placeholder="e.g. contact@supplier.com" />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <small class="err">⚠ {{ msg(form.controls.email) }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="phone">Phone *</label>
+          <input id="phone" type="tel" class="input" formControlName="phone" placeholder="e.g. +91-98765-43210" />
+          @if (form.controls.phone.touched && form.controls.phone.invalid) {
+            <small class="err">⚠ {{ msg(form.controls.phone) }}</small>
+          }
+        </div>
+
+        <div class="field wide">
+          <label for="address">
+            Address <span style="color:var(--muted);font-weight:400">(optional)</span>
+          </label>
+          <input id="address" class="input" formControlName="address" placeholder="Full postal address" />
+        </div>
+
+        @if (supplier(); as s) {
+          <div class="field">
+            <label>Status</label>
+            <div class="static">
+              <span class="badge st-{{ s.status.toLowerCase() }}">{{ s.status }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (error()) {
+      <p class="err-banner">⚠ {{ error() }}</p>
+    }
+    @if (submitted() && form.invalid) {
+      <p class="err-banner">⚠ Please fix the highlighted fields before submitting.</p>
+    }
+    <div class="actions" style="margin-top:4px">
+      <a class="btn" [routerLink]="cancelLink()">Cancel</a>
+      <button type="submit" class="btn btn-primary">
+        {{ supplier() ? 'Save Changes' : 'Add Supplier' }}
+      </button>
+    </div>
+  </form>
+}

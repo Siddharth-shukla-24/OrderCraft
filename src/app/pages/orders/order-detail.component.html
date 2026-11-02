@@ -1,0 +1,105 @@
+@if (order(); as o) {
+  <div class="page-head">
+    <div>
+      <h2>Order #{{ o.order_id }}</h2>
+      <p>
+        <span class="badge s-{{ o.status.toLowerCase() }}">{{ o.status }}</span>
+        &nbsp;·&nbsp;{{ o.order_date | date: 'dd MMMM yyyy' }}
+      </p>
+    </div>
+    <div class="actions">
+      <a class="btn" routerLink="/orders">← Back</a>
+      <a class="btn btn-primary" [routerLink]="['/orders', o.order_id, 'edit']">Edit Order</a>
+    </div>
+  </div>
+
+  <div class="detail-layout">
+    <section class="card">
+      <div class="section-head"><h3>Order Details</h3></div>
+      <dl class="detail-grid">
+        <div>
+          <dt>Customer</dt>
+          <dd>{{ customer()?.customer_name }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ customer()?.email ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>Phone</dt>
+          <dd>{{ customer()?.phone ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>Billing Address</dt>
+          <dd>{{ customer()?.billing_address ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>Order Date</dt>
+          <dd>{{ o.order_date | date: 'dd MMM yyyy' }}</dd>
+        </div>
+        <div>
+          <dt>Required Date</dt>
+          <dd>{{ o.required_date | date: 'dd MMM yyyy' }}</dd>
+        </div>
+        <div>
+          <dt>Created By</dt>
+          <dd>{{ store.userName(o.created_by) }}</dd>
+        </div>
+        <div>
+          <dt>Bill</dt>
+          <dd>
+            @if (bill(); as b) {
+              <a class="link" [routerLink]="['/billing', b.bill_id]">{{ b.bill_number }}</a>
+              <span class="badge b-{{ b.status.toLowerCase() }}" style="margin-left:6px">{{ b.status }}</span>
+            } @else {
+              <span style="color:var(--muted)">Not billed yet</span>
+            }
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h3>Line Items</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item Code</th>
+              <th>Description</th>
+              <th class="num">Qty</th>
+              <th class="num">Unit Price</th>
+              <th class="num">Line Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of items(); track i.order_item_id) {
+              <tr>
+                <td class="nowrap" style="font-family:monospace;font-size:12.5px;background:var(--surface-2)">{{ i.item_code }}</td>
+                <td>{{ i.description }}</td>
+                <td class="num">{{ i.quantity }}</td>
+                <td class="num nowrap">{{ inr(i.unit_price) }}</td>
+                <td class="num nowrap" style="font-weight:700">{{ inr(i.line_total) }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="num" style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em">Order Total</td>
+              <td class="num nowrap" style="font-size:16px">{{ inr(total()) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  </div>
+} @else {
+  <section class="card">
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:40px;margin-bottom:12px">🔍</div>
+      <h3>Order not found</h3>
+      <p class="muted" style="margin-top:8px">No order exists with this ID.</p>
+      <a class="btn btn-primary" routerLink="/orders" style="margin-top:16px;display:inline-flex">Back to orders</a>
+    </div>
+  </section>
+}

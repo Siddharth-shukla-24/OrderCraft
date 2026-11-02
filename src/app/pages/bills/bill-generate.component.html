@@ -1,0 +1,107 @@
+<div class="page-head">
+  <div>
+    <h2>Generate Bill</h2>
+    <p>Create a bill for an eligible order</p>
+  </div>
+  <div class="head-actions">
+    <a class="btn" routerLink="/billing">← Back to Bills</a>
+  </div>
+</div>
+
+<section class="card">
+  <div class="section-head"><h3>Select Order</h3></div>
+  <p class="note">ℹ {{ eligibilityNote }}</p>
+
+  @if (candidates().length === 0) {
+    <div style="text-align:center;padding:32px 20px">
+      <div style="font-size:36px;margin-bottom:10px">✅</div>
+      <p style="color:var(--muted);font-size:14px">No orders available for billing — all eligible orders already have a bill.</p>
+    </div>
+  } @else {
+    <div class="field" style="max-width:480px;margin-top:16px">
+      <label for="order">Order *</label>
+      <select #s id="order" class="input" (change)="select(s.value)">
+        <option value="0">Select an order…</option>
+        @for (c of candidates(); track c.id) {
+          <option [value]="c.id">{{ c.label }}</option>
+        }
+      </select>
+    </div>
+  }
+</section>
+
+@if (order(); as o) {
+  <section class="card">
+    <div class="section-head"><h3>Bill Preview</h3></div>
+
+    <dl class="detail-grid" style="margin-bottom:20px">
+      <div>
+        <dt>Order</dt>
+        <dd style="font-weight:700;color:var(--primary)">#{{ o.order_id }}</dd>
+      </div>
+      <div>
+        <dt>Customer</dt>
+        <dd>{{ customer()?.customer_name }}</dd>
+      </div>
+      <div>
+        <dt>Billing Address</dt>
+        <dd>{{ customer()?.billing_address || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Initial Status</dt>
+        <dd><span class="badge b-generated">GENERATED</span></dd>
+      </div>
+    </dl>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Item Code</th>
+            <th>Description</th>
+            <th class="num">Quantity</th>
+            <th class="num">Unit Price</th>
+            <th class="num">Line Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of items(); track i.order_item_id) {
+            <tr>
+              <td class="nowrap" style="font-family:monospace;font-size:12.5px">{{ i.item_code }}</td>
+              <td>{{ i.description }}</td>
+              <td class="num">{{ i.quantity }}</td>
+              <td class="num nowrap">{{ inr(i.unit_price) }}</td>
+              <td class="num nowrap" style="font-weight:600">{{ inr(i.line_total) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals-section" style="margin-top:18px">
+      <div class="totals-box">
+        <div class="totals-row">
+          <span class="label">Subtotal</span>
+          <span class="amount">{{ inr(subtotal()) }}</span>
+        </div>
+        <div class="totals-row">
+          <span class="label">Tax (policy pending)</span>
+          <span class="amount" style="color:var(--muted)">{{ inr(tax) }}</span>
+        </div>
+        <div class="totals-grand">
+          <span class="label">Total Amount</span>
+          <span class="amount">{{ inr(total()) }}</span>
+        </div>
+      </div>
+    </div>
+
+    @if (error()) {
+      <p class="err-banner" style="margin-top:14px">⚠ {{ error() }}</p>
+    }
+    <div class="actions" style="margin-top:16px">
+      <button type="button" class="btn btn-primary" (click)="generate()">
+        🧾 Generate Bill
+      </button>
+    </div>
+  </section>
+}

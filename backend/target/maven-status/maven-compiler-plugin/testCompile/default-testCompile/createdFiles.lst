@@ -1,0 +1,5 @@
+com\ordercraft\OrderCraftApiIntegrationTest.class
+com\ordercraft\service\SupplierServiceTest.class
+com\ordercraft\service\PaymentServiceTest.class
+com\ordercraft\service\OrderServiceTest.class
+com\ordercraft\service\BillServiceTest.class
